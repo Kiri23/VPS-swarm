@@ -1,0 +1,3 @@
+express.webdevcody.com {
+    reverse_proxy web:3000
+}
