@@ -1,28 +1,63 @@
 version: "3"
 
 services:
-  web:
-    image: webdevcody/express
-    networks:
-      - caddy_network
-
-  caddy:
-    image: caddy:2
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
+  # watchtower no me funciono porque yo tengo mi imagen privada 
+  # y no puedo acceder a ella desde el contenedor de watchtower https://containrrr.dev/watchtower/private-registries/
+  watchtower:
+    image: containrrr/watchtower
+    command:
+      - "--label-enable"
+      - "--interval"
+      - "300"
+      - "--cleanup"
+      - "--debug"
+      - "--trace"
     volumes:
-      - /root/Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    networks:
-      - caddy_network
-
-networks:
-  caddy_network:
-    driver: overlay
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  reverse-proxy:
+    image: traefik:v3.1
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker"
+      - "--providers.docker.exposedbydefault=false" # dont expose all services by default
+      - "--entrypoints.websecure.address=:443"
+      # redirect http to https
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      # obtains https certificates
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=kiri231@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      # 80 is the default port for http
+      - "80:80"
+      # 443 is the default port for https
+      - "443:443"
+      # 8080 is the default port for traefik enabled by api insecure true
+      - "8080:8080"
+    volumes:
+      - letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock
+  web:
+    # watchtower only montitor images with the same tag
+    image: kiri23/express:prod
+    labels:
+      - "traefik.enable=true" # enable traefik for this service
+      - "traefik.http.routers.web.rule=Host(`kiri231.com`)" # route all traffic to this service
+      - "traefik.http.routers.web.entrypoints=websecure" # accesible by https
+      - "traefik.http.routers.web.tls.certresolver=myresolver"
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "com.centurylinklabs.watchtower.cleanup=true"
+    deploy:
+      replicas: 1 # have one instance running at a time
+      restart_policy:
+        condition: on-failure
+        # update_config:
+        # no funciona con docker compose , funciona con docker stack , docker service ...
+        # order: start-first # rolling release, start new instance before stopping old one
 
 volumes:
-  caddy_data:
-  caddy_config:
+  letsencrypt:
