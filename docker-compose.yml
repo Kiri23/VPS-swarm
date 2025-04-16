@@ -1,7 +1,7 @@
 version: "3"
 
 services:
-  # watchtower no me funciono porque yo tengo mi imagen privada 
+  # watchtower no me funciono porque yo tengo mi imagen privada
   # y no puedo acceder a ella desde el contenedor de watchtower https://containrrr.dev/watchtower/private-registries/
   watchtower:
     image: containrrr/watchtower
@@ -18,19 +18,10 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
   reverse-proxy:
     image: traefik:v3.1
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker"
-      - "--providers.docker.exposedbydefault=false" # dont expose all services by default
-      - "--entrypoints.websecure.address=:443"
-      # redirect http to https
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-      # obtains https certificates
-      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.email=kiri231@gmail.com"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    volumes:
+      - letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/kiri/traefik.yml:/etc/traefik/traefik.yml
     ports:
       # 80 is the default port for http
       - "80:80"
@@ -38,20 +29,18 @@ services:
       - "443:443"
       # 8080 is the default port for traefik enabled by api insecure true
       - "8080:8080"
-    volumes:
-      - letsencrypt:/letsencrypt
-      - /var/run/docker.sock:/var/run/docker.sock
   web:
     # watchtower only montitor images with the same tag
     image: kiri23/express:prod
-    labels:
-      - "traefik.enable=true" # enable traefik for this service
-      - "traefik.http.routers.web.rule=Host(`kiri231.com`)" # route all traffic to this service
-      - "traefik.http.routers.web.entrypoints=websecure" # accesible by https
-      - "traefik.http.routers.web.tls.certresolver=myresolver"
-      - "com.centurylinklabs.watchtower.enable=true"
-      - "com.centurylinklabs.watchtower.cleanup=true"
     deploy:
+      labels:
+        - "traefik.enable=true" # enable traefik for this service
+        - "traefik.http.routers.web.rule=Host(`kiri231.com`)" # route all traffic to this service
+        - "traefik.http.routers.web.entrypoints=websecure" # accesible by https
+        - "traefik.http.routers.web.tls.certresolver=myresolver"
+        - "traefik.http.services.web-service.loadbalancer.server.port=3000" # specify the port
+        - "com.centurylinklabs.watchtower.enable=true"
+        - "com.centurylinklabs.watchtower.cleanup=true"
       replicas: 1 # have one instance running at a time
       restart_policy:
         condition: on-failure

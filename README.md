@@ -1,180 +1,220 @@
 # Docker Stack Example
 
-## Building and Deploying
+## Getting Started
 
-### 1. Build and Push the Image
+### 1. Prepare SSH Environment
 
-First, set up multi-platform build support:
+Before doing anything, ensure your SSH environment is properly configured:
 
 ```bash
-# Create and configure buildx builder
-docker buildx create --name mybuilder --use
-docker buildx inspect --bootstrap
+# Add your SSH key to the agent (avoids passphrase prompts)
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519  # For macOS
+# OR
+ssh-add ~/.ssh/id_ed25519  # For Linux/older macOS
+
+# Test SSH connection
+ssh kiri@kiri231.com echo "SSH connection successful"
 ```
 
-Build and push the multi-platform image:
+### 2. Make a Simple Change
+
+Let's make a simple change to the application:
 
 ```bash
+# Edit the server.js file to change the message
+vi src/server.js
+
+# Example change: Update the response message
+# res.send("Hello World! Updated message: " + new Date());
+```
+
+### 3. Build and Push the Image
+
+After making changes, build and push the Docker image:
+
+```bash
+# Build for AMD64 (VPS architecture)
+docker build --platform linux/amd64 -t kiri23/express:prod .
+
+# Push the image to Docker Hub
+docker push kiri23/express:prod
+```
+
+### 4. Deploy to Server
+
+Deploy the updated application:
+
+```bash
+# Switch to remote Docker context
+docker context use hostinger
+
+# Deploy the stack
+docker stack deploy -c docker-compose.yml myapp
+
+# Verify deployment
+docker service ls
+
+# Check logs to confirm the update
+docker service logs myapp_web --tail 10
+```
+
+### 5. Verify the Deployment
+
+Check that your application is running correctly:
+
+```bash
+# Test the application
+curl -k https://kiri231.com
+```
+
+You should see your updated message.
+
+## Advanced Build Options
+
+For multi-platform builds (if needed):
+
+```bash
+# Set up multi-platform build support
+docker buildx create --name mybuilder --use
+docker buildx inspect --bootstrap
+
 # Build and push for both ARM and AMD platforms
 docker buildx build --platform linux/amd64,linux/arm64 -t kiri23/express:prod --push .
 ```
 
-Alternative simpler command without buildx:
+## Traefik Configuration
+
+If you need to update the Traefik configuration:
 
 ```bash
-# Build only for AMD64 (VPS)
-docker build --platform linux/amd64 -t kiri23/express:prod .
-docker push kiri23/express:prod
-```
+# Edit the traefik.yml file locally
+vi config/traefik.yml
 
-### 2. Deploy to Server
+# Copy to the server
+scp config/traefik.yml kiri@kiri231.com:/home/kiri/
 
-To deploy the app in your host machine run:
-
-```bash
-docker context use hostinger
+# Redeploy to apply changes
 docker stack deploy -c docker-compose.yml myapp
 ```
 
-### 3. Update the Application
 
-When you make changes to the code:
 
-1. Build and push a new version (choose appropriate build command from above)
-2. Watchtower will automatically detect and deploy the new version within 5
-   minutes.
+## Common Issues and Solutions
 
-## Debugging Guide
+### 1. SSH Connection Issues
 
-### Understanding Service Names
-
-- Services in Docker Swarm follow the naming convention:
-  `<stack_name>_<service_name>`
-- Example: `myapp_web`, `myapp_watchtower`
-
-### Common Debugging Commands
-
-#### 1. Check Service Status
+If you can't connect to the server:
 
 ```bash
-# List all services and their status
-docker service ls
+# Add your SSH key to the agent
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519
 
-# Get detailed info about a specific service
-docker service ps myapp_web
+# Test SSH connection
+ssh kiri@kiri231.com echo "SSH connection successful"
 ```
 
-- `service ps` shows:
-  - Current and previous container instances
-  - Image versions
-  - Node placement
-  - Container states
-  - Error messages if any
+### 2. Docker Context Connection Issues
 
-#### 2. Check Service Logs
+If you see this error:
+```
+error during connect: Get "http://docker.example.com/v1.24/info": command [ssh -l kiri -- kiri231.com docker system dial-stdio] has exited with exit status 255
+```
 
+Try these steps:
 ```bash
-# View all logs
-docker service logs myapp_web
+# Test direct SSH connection to Docker
+ssh kiri@kiri231.com docker info
 
-# View recent logs (last 2 minutes)
-docker service logs --since 2m myapp_web
-
-# Follow logs in real-time
-docker service logs -f myapp_web
+# Reset Docker context
+docker context use default
+docker context use hostinger
 ```
 
-#### 3. Debugging Watchtower
+### 3. Architecture Mismatch
 
-```bash
-# View Watchtower logs
-docker service logs myapp_watchtower
-```
-
-Understanding Watchtower logs:
-
-- `Scanned=0`: Watchtower isn't finding containers to monitor
-  - Check if containers have the label
-    `com.centurylinklabs.watchtower.enable=true`
-- `Scanned=1, Updated=0`: Found container but no updates needed
-- `Scanned=1, Updated=1`: Successfully updated a container
-
-Common Watchtower Warnings:
-
-```
-"Could not do a head request... falling back to regular pull"
-"Parsed container image ref has no tag"
-```
-
-These warnings are normal and indicate:
-
-- Watchtower is using an alternative method to check for updates
-- The container is using a SHA-based image reference (secure and normal)
-- Not an error if you see `Scanned=X Updated=0` in the same log
-
-Troubleshooting No Updates:
-
-1. Verify the image was pushed:
-
-```bash
-# Check if image exists in registry
-docker pull kiri23/express:prod
-```
-
-2. Compare image digests:
-
-```bash
-# Get current running image digest
-docker service ps myapp_web --format "{{.Image}}"
-
-# Get latest image digest
-docker image inspect kiri23/express:prod -f "{{.Id}}"
-```
-
-3. Force pull latest image:
-
-```bash
-# Force pull new image
-docker pull kiri23/express:prod
-
-# Force service update
-docker service update --force myapp_web
-```
-
-#### 4. Force Update Service
-
-If Watchtower isn't updating automatically:
-
-```bash
-docker service update --force myapp_web
-```
-
-### Common Issues and Solutions
-
-1. Architecture Mismatch
-
+If you see this warning:
 ```
 WARNING: The requested image's platform (linux/arm64) does not match the detected host platform (linux/amd64)
 ```
 
-Solution: Build specifically for AMD64 (VPS architecture)
+Make sure to build specifically for AMD64:
+```bash
+docker build --platform linux/amd64 -t kiri23/express:prod .
+```
 
-2. Watchtower Not Updating
+### 4. Application Not Updating
 
-- Verify labels in docker-compose.yml
-- Check Watchtower logs for scanning status
-- Verify image was pushed correctly to registry
+If your changes aren't appearing after deployment:
 
-3. Container Startup Issues
+```bash
+# Check if the image was pushed correctly
+docker pull kiri23/express:prod
 
-- Use `docker service ps` to check for error messages
-- Use `docker service logs` to view application logs
-- Check for platform compatibility issues
+# Force update the service
+docker service update --force myapp_web
 
-### Notes
+# Check logs
+docker service logs myapp_web --tail 20
+```
+
+### 5. Traefik Routing Issues
+
+If your application is running but not accessible via the domain:
+
+```bash
+# Check Traefik logs
+docker service logs myapp_reverse-proxy --tail 20
+
+# Verify traefik.yml is in the correct location
+ssh kiri@kiri231.com "ls -l /home/kiri/traefik.yml"
+
+# If needed, copy traefik.yml again and redeploy
+scp config/traefik.yml kiri@kiri231.com:/home/kiri/
+docker stack deploy -c docker-compose.yml myapp
+```
+
+## Notes
 
 - Your VPS uses AMD64 architecture
 - Your local M2 Mac uses ARM64 architecture
-- Always check service logs when debugging
-- Use `--force` update when immediate service refresh is needed
-- The stack includes Traefik for SSL/TLS and reverse proxy
+- The stack includes:
+  - Traefik for SSL/TLS and reverse proxy (configuration in `config/traefik.yml`)
+  - Express web application
+  - Watchtower for automatic updates
+
+## Advanced Debugging
+
+For more detailed debugging information, including:
+- SSH and Docker Context configuration
+- Troubleshooting connection issues
+- Advanced service debugging
+
+See the [DEBUGGING.md](DEBUGGING.md) file.
+
+## Local Development
+
+### Running the Application Locally
+
+You can run the application locally using Docker Compose:
+
+```bash
+# Build and start the containers
+docker compose -f docker-compose.local.yml up --build -d
+
+# Check the status of the containers
+docker ps
+
+# Stop the containers
+docker compose -f docker-compose.local.yml down
+```
+
+Once the containers are running, you can access:
+- The application at http://localhost:8000
+- The Traefik dashboard at http://localhost:8081/dashboard/
+
+### Local Configuration Files
+
+- `docker-compose.local.yml`: Configuration for local development
+- `config/traefik.local.yml`: Traefik configuration for local development
+
+These files are configured to run the application locally without SSL/TLS certificates, making it easier to test changes before deploying to the VPS.
