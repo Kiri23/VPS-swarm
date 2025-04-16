@@ -1,3 +1,12 @@
+# LOCAL DEVELOPMENT CONFIGURATION:
+# This docker-compose.local.yml is designed for local development:
+# - Uses standard Docker Compose syntax (no Swarm-specific features)
+# - Builds the web service from local source code instead of using a pre-built image
+# - Maps to localhost instead of a production domain
+# - Uses different ports (8000, 8081) to avoid conflicts with local services
+# - Loads Traefik config from ./config/traefik.local.yml
+# - To run: use 'docker compose -f docker-compose.local.yml up --build -d'
+
 version: "3"
 
 services:

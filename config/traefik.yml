@@ -4,6 +4,7 @@ api:
 
 providers:
   swarm:
+    # how to comunicate with docker in swarm mode to find labels and service
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: true
     watch: true

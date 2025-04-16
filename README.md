@@ -218,3 +218,5 @@ Once the containers are running, you can access:
 - `config/traefik.local.yml`: Traefik configuration for local development
 
 These files are configured to run the application locally without SSL/TLS certificates, making it easier to test changes before deploying to the VPS.
+
+For a detailed comparison between the local and production Docker Compose configurations, see [docker-compose-comparison.md](docker-compose-comparison.md).
