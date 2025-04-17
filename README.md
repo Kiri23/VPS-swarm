@@ -1,5 +1,18 @@
 # Docker Stack Example
 
+## ¿Qué es este proyecto?
+
+Este proyecto es un sistema de hosting personal basado en Docker Swarm y Traefik. Proporciona una infraestructura maestra que funciona como un sistema de "plug and play" para aplicaciones web.
+
+### Características principales
+
+- **Infraestructura flexible**: No necesita modificaciones cuando añades nuevas aplicaciones
+- **Gestión automática**: Se encarga del enrutamiento, balanceo de carga y descubrimiento de servicios
+- **Compatible con cualquier tecnología**: Permite añadir cualquier tipo de aplicación independientemente del lenguaje
+- **Funciona local y remotamente**: Configura el mismo entorno tanto en tu máquina local como en un VPS
+
+Esencialmente, has construido un sistema similar a lo que ofrecen servicios como Heroku o Vercel, pero completamente bajo tu control y funcionando tanto en tu máquina local como en tu VPS en Hostinger.
+
 ## Getting Started
 
 ### 1. Prepare SSH Environment
@@ -220,3 +233,47 @@ Once the containers are running, you can access:
 These files are configured to run the application locally without SSL/TLS certificates, making it easier to test changes before deploying to the VPS.
 
 For a detailed comparison between the local and production Docker Compose configurations, see [docker-compose-comparison.md](docs/docker-compose-comparison.md).
+
+## Añadir nuevas aplicaciones
+
+Una de las principales ventajas de esta infraestructura es la facilidad para añadir nuevas aplicaciones sin modificar la configuración central.
+
+### Proceso para añadir una nueva aplicación
+
+1. **Dockerizar la aplicación**:
+   - Crear un Dockerfile que construya y ejecute tu aplicación
+   - Asegurarte de que expone algún puerto HTTP
+
+2. **Crear un docker-compose.yml** con:
+   ```yaml
+   version: "3"
+
+   services:
+     mi-app:
+       build: .
+       # o image: nombre-imagen:tag si usas una imagen existente
+       networks:
+         - traefik-local
+       labels:
+         - "traefik.enable=true"
+         - "traefik.http.routers.mi-app.rule=Host(`mi-app.localhost`)"
+         - "traefik.http.services.mi-app-service.loadbalancer.server.port=PUERTO_INTERNO"
+
+   networks:
+     traefik-local:
+       external: true
+   ```
+
+3. **Iniciar la aplicación**:
+   ```bash
+   docker compose up -d
+   ```
+
+4. **Actualizar tu archivo hosts** (para desarrollo local):
+   ```
+   127.0.0.1 mi-app.localhost
+   ```
+
+Y eso es todo. Traefik detectará automáticamente la nueva aplicación y comenzará a enrutar el tráfico a ella basándose en el dominio.
+
+Para desplegar en producción, simplemente adapta el docker-compose.yml para usar Docker Swarm y despliégalo en tu VPS.
