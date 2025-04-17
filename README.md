@@ -189,7 +189,7 @@ For more detailed debugging information, including:
 - Troubleshooting connection issues
 - Advanced service debugging
 
-See the [DEBUGGING.md](DEBUGGING.md) file.
+See the [DEBUGGING.md](docs/DEBUGGING.md) file.
 
 ## Local Development
 
@@ -219,4 +219,4 @@ Once the containers are running, you can access:
 
 These files are configured to run the application locally without SSL/TLS certificates, making it easier to test changes before deploying to the VPS.
 
-For a detailed comparison between the local and production Docker Compose configurations, see [docker-compose-comparison.md](docker-compose-comparison.md).
+For a detailed comparison between the local and production Docker Compose configurations, see [docker-compose-comparison.md](docs/docker-compose-comparison.md).
