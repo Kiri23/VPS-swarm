@@ -238,20 +238,19 @@ For a detailed comparison between the local and production Docker Compose config
 
 Una de las principales ventajas de esta infraestructura es la facilidad para añadir nuevas aplicaciones sin modificar la configuración central.
 
-### Proceso para añadir una nueva aplicación
+### Añadir aplicaciones para desarrollo local
 
 1. **Dockerizar la aplicación**:
    - Crear un Dockerfile que construya y ejecute tu aplicación
    - Asegurarte de que expone algún puerto HTTP
 
-2. **Crear un docker-compose.yml** con:
+2. **Crear un docker-compose.local.yml** con:
    ```yaml
    version: "3"
 
    services:
      mi-app:
        build: .
-       # o image: nombre-imagen:tag si usas una imagen existente
        networks:
          - traefik-local
        labels:
@@ -266,14 +265,54 @@ Una de las principales ventajas de esta infraestructura es la facilidad para añ
 
 3. **Iniciar la aplicación**:
    ```bash
-   docker compose up -d
+   docker compose -f docker-compose.local.yml up -d
    ```
 
-4. **Actualizar tu archivo hosts** (para desarrollo local):
+4. **Actualizar tu archivo hosts**:
    ```
    127.0.0.1 mi-app.localhost
    ```
 
-Y eso es todo. Traefik detectará automáticamente la nueva aplicación y comenzará a enrutar el tráfico a ella basándose en el dominio.
+Traefik detectará automáticamente la nueva aplicación y comenzará a enrutar el tráfico a ella.
 
-Para desplegar en producción, simplemente adapta el docker-compose.yml para usar Docker Swarm y despliégalo en tu VPS.
+### Añadir aplicaciones al VPS (desde repositorios diferentes)
+
+1. **En el repositorio de la nueva aplicación**:
+   - Crear un Dockerfile para la aplicación
+   - Construir y subir la imagen a Docker Hub:
+   ```bash
+   docker build --platform linux/amd64 -t kiri23/nueva-app:prod .
+   docker push kiri23/nueva-app:prod
+   ```
+
+2. **Crear un docker-compose.yml para producción**:
+   ```yaml
+   version: "3"
+
+   services:
+     web:
+       image: kiri23/nueva-app:prod
+       deploy:
+         labels:
+           - "traefik.enable=true"
+           - "traefik.http.routers.nueva-app.rule=Host(`nueva-app.kiri231.com`)"
+           - "traefik.http.routers.nueva-app.entrypoints=websecure"
+           - "traefik.http.routers.nueva-app.tls.certresolver=myresolver"
+           - "traefik.http.services.nueva-app-service.loadbalancer.server.port=PUERTO_INTERNO"
+           - "com.centurylinklabs.watchtower.enable=true"
+         replicas: 1
+         restart_policy:
+           condition: on-failure
+   ```
+
+3. **Desplegar en el VPS como un stack independiente**:
+   ```bash
+   docker context use hostinger
+   docker stack deploy -c docker-compose.yml nueva-app
+   ```
+
+Cada aplicación se despliega como un stack independiente, lo que facilita su gestión individual.
+
+### Gestión de múltiples aplicaciones
+
+A medida que añadas más aplicaciones a tu infraestructura, es importante mantener un buen sistema de gestión. Para aprender más sobre cómo gestionar múltiples aplicaciones, hacer seguimiento de lo que tienes desplegado y mantener el control a largo plazo, consulta la [guía de gestión de infraestructura](docs/INFRASTRUCTURE_MANAGEMENT.md).
