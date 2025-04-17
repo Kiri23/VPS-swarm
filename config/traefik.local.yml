@@ -6,6 +6,7 @@ providers:
   docker:
     exposedByDefault: false
     watch: true
+    network: traefik-local
 
 entryPoints:
   web:
@@ -15,3 +16,7 @@ log:
   level: DEBUG
 
 accessLog: {}
+
+# Enable local domain resolution
+# For local development, add entries to your /etc/hosts file:
+# 127.0.0.1 app1.localhost app2.localhost
