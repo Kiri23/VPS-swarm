@@ -4,6 +4,7 @@
 # - Labels under 'deploy' section for Traefik in Swarm mode
 # - To deploy: use 'docker stack deploy -c docker-compose.yml myapp'
 # - NOT compatible with regular 'docker-compose up' command
+# aqui estoy cogiendo y cambiandolo em texstatic
 version: "3"
 
 services:

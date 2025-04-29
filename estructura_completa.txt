@@ -1,0 +1,42 @@
+.
+|--.dockerignore
+|--README.md
+|--app1
+| |----Dockerfile
+| |----LICENSE
+| |----package-lock.json
+| |----package.json
+| |----src
+| |-- |----server.js
+|--app2
+| |----Dockerfile
+| |----docker-compose.local.yml
+| |----package.json
+| |----src
+| |-- |----server.js
+|--config
+| |----traefik.local.yml
+| |----traefik.yml
+|--docker-compose.local.yml
+|--docker-compose.yml
+|--docs
+| |----DEBUGGING.md
+| |----INFRASTRUCTURE_MANAGEMENT.md
+| |----Learning
+| |-- |----docker-swarm-multi-device-orchestration.md
+| |-- |----docker-swarm-vs-compose.md
+| |----augment-memory.md
+| |----docker-compose-comparison.md
+| |----multi-app-traefik-local-architecture.md
+| |----multi-app-traefik-local-explanation.md
+|--estructura_completa.txt
+|--start-local-multi-app.sh
+|--stop-local-multi-app.sh
+|--user_stories
+| |----admin_ui_like_heroku
+| |-- |----FEATURE_CONCEPT.md
+| |----multi_app_traefik
+| |-- |----ARCHITECTURE.md
+| |-- |----IMPLEMENTATION_GUIDE.md
+| |-- |----QUICK_REFERENCE.md
+| |-- |----USER_STORIES.md
