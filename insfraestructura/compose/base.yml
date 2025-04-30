@@ -1,0 +1,32 @@
+services:
+  # watchtower no me funciono porque yo tengo mi imagen privada
+  # y no puedo acceder a ella desde el contenedor de watchtower https://containrrr.dev/watchtower/private-registries/
+  watchtower:
+    image: containrrr/watchtower
+    command:
+      - "--label-enable"
+      - "--interval"
+      - "300"
+      - "--cleanup"
+      - "--debug"
+      - "--trace"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+  reverse-proxy:
+    image: traefik:v3.1
+    volumes:
+      - letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock
+      # load the traefik.yml from the VPS server. For this to work, you need to scp the traefik.yml to the VPS server
+      - /home/kiri/traefik.yml:/etc/traefik/traefik.yml
+    ports:
+      # 80 is the default port for http
+      - "80:80"
+      # 443 is the default port for https
+      - "443:443"
+      # 8080 is the default port for traefik enabled by api insecure true
+      - "8080:8080"
+volumes:
+  letsencrypt:
