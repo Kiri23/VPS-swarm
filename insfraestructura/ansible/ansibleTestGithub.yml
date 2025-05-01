@@ -1,32 +1,10 @@
-- name: Hello World on VPS
+- name: Minimal Hello World
   hosts: all
-  gather_facts: yes
+  gather_facts: no  # Desactivamos la recopilación de hechos
   
   tasks:
-    - name: Get current date
-      command: date
-      register: date_result
-      
     - name: Create hello world file
       copy:
-        content: |
-          Hello from GitHub Actions!
-          This file was created via Ansible running from GitHub Actions.
-          Repository: {{ lookup('env', 'GITHUB_REPOSITORY') }}
-          Branch: {{ lookup('env', 'GITHUB_REF_NAME') }}
-          Created at: {{ date_result.stdout }}
+        content: "Hello from GitHub Actions! Created at {{ ansible_date_time.iso8601 }}"
         dest: "/home/kiri/hello-from-github-actions.txt"
         mode: '0644'
-      
-    - name: Verify file was created
-      stat:
-        path: "/home/kiri/hello-from-github-actions.txt"
-      register: file_info
-    
-    - name: Show file information
-      debug:
-        msg: 
-          - "File created: {{ file_info.stat.exists }}"
-          - "File size: {{ file_info.stat.size }} bytes"
-          - "File owner: {{ file_info.stat.pw_name }}"
-          - "Created at: {{ file_info.stat.mtime }}"
