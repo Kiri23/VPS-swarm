@@ -1,5 +1,5 @@
 - name: Hello World on VPS
-  hosts: vps
+  hosts: all
   gather_facts: yes
   
   tasks:
