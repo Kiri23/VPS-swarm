@@ -54,4 +54,11 @@ jobs:
         SSH_HOST: ${{ secrets.SSH_HOST }}
         SSH_USER: ${{ secrets.SSH_USER }}
       run: |
-        ansible-playbook -i "$SSH_HOST," -u "$SSH_USER" --private-key=~/.ssh/id_ed25519 ansibleTestGithub.yml
+        export ANSIBLE_HOST_KEY_CHECKING=False
+        export ANSIBLE_SSH_PASS=$SSH_PASSPHRASE
+        sshpass -p "$SSH_PASSPHRASE" ansible-playbook -i "$SSH_HOST," \
+        -u "$SSH_USER" \
+        --private-key=~/.ssh/id_ed25519 \
+        --ssh-common-args="-o StrictHostKeyChecking=no" \
+        ${{ github.workspace }} /insfraestructura/ansible/ansibleTestGithub.yml
+
