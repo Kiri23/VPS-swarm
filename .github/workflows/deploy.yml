@@ -29,4 +29,4 @@ jobs:
         SSH_HOST: ${{ secrets.SSH_HOST }}
         SSH_USER: ${{ secrets.SSH_USER }}
       run: |
-        ansible-playbook -i "$SSH_HOST," -u "$SSH_USER" --private-key=~/.ssh/id_ed25519 ${{ github.workspace }}/insfraestructura/ansible/ansibleTest.yml
+        ansible-playbook -i "$SSH_HOST," -u "$SSH_USER" --private-key=~/.ssh/id_ed25519 ${{ github.workspace }}/insfraestructura/ansible/ansibleTestGithub.yml
