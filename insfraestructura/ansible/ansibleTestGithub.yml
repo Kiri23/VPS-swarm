@@ -1,10 +1,10 @@
 - name: Minimal Hello World
-  hosts: all
-  gather_facts: no  # Desactivamos la recopilación de hechos
+  hosts: vps
+  gather_facts: yes
   
   tasks:
     - name: Create hello world file
       copy:
         content: "Hello from GitHub Actions!"
-        dest: "/home/kiri/hello-from-github-actions.txt"
+        dest: "/home/kiri/hello-from-github-actions2.txt"
         mode: '0644'
