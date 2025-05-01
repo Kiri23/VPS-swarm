@@ -31,24 +31,7 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
         chmod 600 ~/.ssh/id_ed25519
         ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-    
-    - name: Debug SSH setup
-      env:
-        SSH_HOST: ${{ secrets.SSH_HOST }}
-        SSH_USER: ${{ secrets.SSH_USER }}
-      run: |
-        # Ver el estado del directorio .ssh
-        ls -la ~/.ssh/
-        
-        # Verificar los permisos del archivo de clave
-        chmod 600 ~/.ssh/id_ed25519
-        
-        # Imprimir las primeras líneas de la clave (sin revelar toda la clave)
-        head -n 1 ~/.ssh/id_ed25519
-        
-        # Intentar una conexión SSH con verbosidad para ver más detalles
-        ssh -v -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST echo "SSH Test"
-        
+            
     - name: Run Ansible playbook
       env:
         SSH_HOST: ${{ secrets.SSH_HOST }}
