@@ -1,4 +1,4 @@
-name: Ansible VPS Hello World
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,13 +6,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  hello-world:
+  deploy:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       
+    - name: Set environment variables based on branch
+      run: |
+        if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          echo "ENV=prod" >> $GITHUB_ENV
+        else
+          echo "ENV=staging" >> $GITHUB_ENV
+        fi
+        
     - name: Install Ansible
       run: |
         pip install ansible
@@ -23,27 +31,27 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
         chmod 600 ~/.ssh/id_ed25519
         ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-  
-  - name: Debug SSH setup
-    env:
-      SSH_HOST: ${{ secrets.SSH_PRIVATE_KEY }}
-      SSH_USER: ${{ secrets.SSH_USER }}
-    run: |
-       # Ver el estado del directorio .ssh
-       ls -la ~/.ssh/
     
-      # Verificar los permisos del archivo de clave
-      chmod 600 ~/.ssh/id_ed25519
-    
-      # Imprimir las primeras líneas de la clave (sin revelar toda la clave)
-      head -n 1 ~/.ssh/id_ed25519
-    
-      # Intentar una conexión SSH con verbosidad para ver más detalles
-      ssh -v -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST echo "SSH Test"
+    - name: Debug SSH setup
+      env:
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+      run: |
+        # Ver el estado del directorio .ssh
+        ls -la ~/.ssh/
+        
+        # Verificar los permisos del archivo de clave
+        chmod 600 ~/.ssh/id_ed25519
+        
+        # Imprimir las primeras líneas de la clave (sin revelar toda la clave)
+        head -n 1 ~/.ssh/id_ed25519
+        
+        # Intentar una conexión SSH con verbosidad para ver más detalles
+        ssh -v -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST echo "SSH Test"
         
     - name: Run Ansible playbook
       env:
         SSH_HOST: ${{ secrets.SSH_HOST }}
         SSH_USER: ${{ secrets.SSH_USER }}
       run: |
-        ansible-playbook -i "$SSH_HOST," -u "$SSH_USER" --private-key=~/.ssh/id_ed25519 ${{ github.workspace }}/insfraestructura/ansible/ansibleTestGithub.yml
+        ansible-playbook -i "$SSH_HOST," -u "$SSH_USER" --private-key=~/.ssh/id_ed25519 ansibleTestGithub.yml
