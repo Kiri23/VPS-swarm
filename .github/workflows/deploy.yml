@@ -13,35 +13,26 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set environment variables based on branch
+    - name: Create ansible.cfg
       run: |
-        if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-          echo "ENV=prod" >> $GITHUB_ENV
-        else
-          echo "ENV=staging" >> $GITHUB_ENV
-        fi
-        
-    - name: Install Ansible
-      run: |
-        pip install ansible
+        echo "[defaults]" > ansible.cfg
+        echo "host_key_checking = False" >> ansible.cfg
+        echo "[ssh_connection]" >> ansible.cfg
+        echo "pipelining = True" >> ansible.cfg
         
     - name: Set up SSH keys
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        
+    - name: Install Ansible
+      run: pip install ansible
+        
+    - name: Set environment variables
       run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-        chmod 600 ~/.ssh/id_ed25519
-        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-
+        echo "SSH_HOST=${{ secrets.SSH_HOST }}" >> $GITHUB_ENV
+        echo "SSH_USER=${{ secrets.SSH_USER }}" >> $GITHUB_ENV
+        
     - name: Run Ansible playbook
-      env:
-        SSH_HOST: ${{ secrets.SSH_HOST }}
-        SSH_USER: ${{ secrets.SSH_USER }}
       run: |
-        export ANSIBLE_HOST_KEY_CHECKING=False
-        export ANSIBLE_SSH_PASS=$SSH_PASSPHRASE
-        sshpass -p "$SSH_PASSPHRASE" ansible-playbook -i "$SSH_HOST," \
-        -u "$SSH_USER" \
-        --private-key=~/.ssh/id_ed25519 \
-        --ssh-common-args="-o StrictHostKeyChecking=no" \
-        ${{ github.workspace }}/insfraestructura/ansible/ansibleTestGithub.yml
-
+        ansible-playbook -i ${{ github.workspace }}/insfraestructura/ansible/inventory.yml ${{ github.workspace }}/insfraestructura/ansible/ansibleTestGithub.yml
