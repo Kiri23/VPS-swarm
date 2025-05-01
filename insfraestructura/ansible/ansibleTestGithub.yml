@@ -5,6 +5,6 @@
   tasks:
     - name: Create hello world file
       copy:
-        content: "Hello from GitHub Actions! Created at {{ ansible_date_time.iso8601 }}"
+        content: "Hello from GitHub Actions!"
         dest: "/home/kiri/hello-from-github-actions.txt"
         mode: '0644'
