@@ -1,0 +1,20 @@
+---
+- name: Deploy applications to Docker Swarm
+  hosts: vps
+  vars:
+    # Variables por defecto que pueden ser sobrescritas
+    apps: []  # Lista de aplicaciones a desplegar
+    env: dev  # Entorno por defecto
+  
+  tasks:
+    - name: Include application variables
+      include_vars:
+        file: "../../app1/pass.yml"
+
+    - name: Generate docker-compose files for each application
+      template:
+        src: docker-compose-staging.yml.j2
+        dest: /home/kiri/vps-swarm-local-vps-development/insfraestructura/ansible/templates/docker-compose-staging.yml
+      
+    # - name: Deploy stacks to Docker Swarm
+    #   shell: "docker stack deploy -c /template/docker-compose-staging.yml staging"

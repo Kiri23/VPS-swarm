@@ -35,4 +35,4 @@ jobs:
         
     - name: Run Ansible playbook
       run: |
-        ansible-playbook -i ${{ github.workspace }}/insfraestructura/ansible/inventory.yml ${{ github.workspace }}/insfraestructura/ansible/ansibleTestGithub.yml
+        ansible-playbook -i ${{ github.workspace }}/insfraestructura/ansible/inventory.yml ${{ github.workspace }}/insfraestructura/ansible/deploy.yml
