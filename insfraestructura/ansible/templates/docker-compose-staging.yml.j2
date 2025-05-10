@@ -1,2 +1,23 @@
-{{ app }}
-{{ app.name }}
+version: "3"
+
+services:
+  {{appName}}:
+    # watchtower only montitor images with the same tag
+    image: kiri23/{{imageName}}:{{env}}
+    # deploy is a swarm specific feature. Used with docker stack deploy when deploying the stack
+    deploy:
+      #the label need to be under deploy so traefik can read it
+      labels:
+        - "traefik.enable=true" # enable traefik for this service
+        - "traefik.http.routers.{{appName}}.rule=Host(`{{ '{{appName}}' if env == 'prod' else '{{env}}.{{appName}}' }}.kiri231.com`)" # route all traffic to this service
+        - "traefik.http.routers.{{appName}}.entrypoints=websecure" # accesible by https
+        - "traefik.http.routers.{{appName}}.tls.certresolver=myresolver"
+        - "traefik.http.services.{{appName}}-service.loadbalancer.server.port=3000" # specify the port
+        - "com.centurylinklabs.watchtower.enable=true"
+        - "com.centurylinklabs.watchtower.cleanup=true"
+      replicas: 1 # have one instance running at a time
+      restart_policy:
+        condition: on-failure
+        # update_config:
+        # no funciona con docker compose , funciona con docker stack , docker service ...
+        # order: start-first # rolling release, start new instance before stopping old one

@@ -15,6 +15,10 @@
       template:
         src: docker-compose-staging.yml.j2
         dest: /home/kiri/vps-swarm-local-vps-development/insfraestructura/ansible/templates/docker-compose-staging.yml
-      
-    # - name: Deploy stacks to Docker Swarm
-    #   shell: "docker stack deploy -c /template/docker-compose-staging.yml staging"
+        
+    - name: Deploy stack to Staging
+      community.docker.docker_stack:
+        state: present
+        name: staging
+        compose: 
+          - /home/kiri/vps-swarm-local-vps-development/insfraestructura/ansible/templates/docker-compose-staging.yml
