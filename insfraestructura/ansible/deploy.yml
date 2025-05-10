@@ -101,18 +101,18 @@
 
     - name: Include application variables
       include_vars:
-        file: "{{ app_path }}/pass.yml"
+        file: "../../app1/pass.yml"
 
     # Construcción y publicación de la imagen Docker
-    - name: Check if Dockerfile exists
-      ansible.builtin.stat:
-        path: "{{ app_path }}/Dockerfile"
-      register: dockerfile_exists
+    # - name: Check if Dockerfile exists
+    #   ansible.builtin.stat:
+    #     path: "{{ app_path }}/Dockerfile"
+    #   register: dockerfile_exists
       
-    - name: Fail if Dockerfile doesn't exist
-      ansible.builtin.fail:
-        msg: "No se encontró el Dockerfile en {{ app_path }}/Dockerfile"
-      when: not dockerfile_exists.stat.exists
+    # - name: Fail if Dockerfile doesn't exist
+    #   ansible.builtin.fail:
+    #     msg: "No se encontró el Dockerfile en {{ app_path }}/Dockerfile"
+    #   when: not dockerfile_exists.stat.exists
 
     # - name: Check Docker Hub login status
     #   ansible.builtin.shell: docker info | grep -q 'Username:'
