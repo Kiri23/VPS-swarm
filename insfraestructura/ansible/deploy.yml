@@ -1,6 +1,6 @@
 ---
 - name: Deploy applications to Docker Swarm
-  hosts: localhost
+  hosts: vps
   vars:
     # Variables por defecto que pueden ser sobrescritas
     apps: []  # Lista de aplicaciones a desplegar
