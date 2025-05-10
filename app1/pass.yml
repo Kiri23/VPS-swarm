@@ -1,3 +1,8 @@
 appName: app1
 imageName: express
 env: staging
+
+# - name: Run Ansible playbook
+  # env:
+  #   ANSIBLE_BECOME_PASS: ${{ secrets.SUDO_PASSWORD }}
+# run: ansible-playbook deploy.yml
