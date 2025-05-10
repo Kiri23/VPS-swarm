@@ -5,8 +5,38 @@
     # Variables por defecto que pueden ser sobrescritas
     apps: []  # Lista de aplicaciones a desplegar
     env: dev  # Entorno por defecto
+    venv_path: "/home/kiri/vps-swarm-local-vps-development/insfraestructura/ansible/.venv"
+    requirements_file: "/home/kiri/vps-swarm-local-vps-development/insfraestructura/ansible/requirements.txt"
   
   tasks:
+    - name: Ensure virtualenv package is installed
+      ansible.builtin.package:
+        name: python3-virtualenv
+        state: present
+      become: true  # Usar sudo para instalar paquetes
+
+    - name: Create virtual environment
+      ansible.builtin.pip:
+        name: pip
+        state: latest
+        virtualenv: "{{ venv_path }}"
+        virtualenv_command: python3 -m venv
+
+    - name: Create requirements file if it doesn't exist
+      ansible.builtin.copy:
+        dest: "{{ requirements_file }}"
+        content: |
+          jsondiff
+          docker
+        force: no  # No sobrescribir si ya existe
+
+    - name: Install dependencies in virtual environment
+      ansible.builtin.pip:
+        requirements: "{{ requirements_file }}"
+        virtualenv: "{{ venv_path }}"
+      environment:
+        PATH: "{{ venv_path }}/bin:{{ ansible_env.PATH }}"
+
     - name: Include application variables
       include_vars:
         file: "../../app1/pass.yml"
@@ -22,3 +52,7 @@
         name: staging
         compose: 
           - /home/kiri/vps-swarm-local-vps-development/insfraestructura/ansible/templates/docker-compose-staging.yml
+      environment:
+        PATH: "{{ venv_path }}/bin:{{ ansible_env.PATH }}"
+      vars:
+        ansible_python_interpreter: "{{ venv_path }}/bin/python"
