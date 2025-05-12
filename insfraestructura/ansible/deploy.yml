@@ -162,6 +162,17 @@
     #     ansible_python_interpreter: "{{ venv_path }}/bin/python"
 
 
+    - name: Ensure traefik-public network exists
+      community.docker.docker_network:
+        name: traefik-public
+        driver: overlay
+        attachable: yes
+        state: present
+      environment:
+        PATH: "{{ venv_path }}/bin:{{ ansible_env.PATH }}"
+      vars:
+        ansible_python_interpreter: "{{ venv_path }}/bin/python"
+
     - name: Generate docker-compose files for each application
       template:
         src: docker-compose-staging.yml.j2

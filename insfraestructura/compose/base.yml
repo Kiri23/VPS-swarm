@@ -12,6 +12,8 @@ services:
       - "--trace"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - traefik-public
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
   reverse-proxy:
@@ -28,5 +30,12 @@ services:
       - "443:443"
       # 8080 is the default port for traefik enabled by api insecure true
       - "8080:8080"
+    networks:
+      - traefik-public
+
+networks:
+  traefik-public:
+    external: true
+    
 volumes:
   letsencrypt:

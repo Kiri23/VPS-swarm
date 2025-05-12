@@ -5,7 +5,7 @@ services:
     # watchtower only montitor images with the same tag
     image: kiri23/{{imageName}}:{{env}}
     networks:
-      - myapp_default
+      - traefik-public
     # deploy is a swarm specific feature. Used with docker stack deploy when deploying the stack
     deploy:
       #the label need to be under deploy so traefik can read it
@@ -24,6 +24,5 @@ services:
         # no funciona con docker compose , funciona con docker stack , docker service ...
         # order: start-first # rolling release, start new instance before stopping old one
 networks:
-  traefik-net:
+  traefik-public:
     external: true
-    name: myapp_default
