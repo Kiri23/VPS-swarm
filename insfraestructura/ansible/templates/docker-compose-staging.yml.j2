@@ -9,10 +9,10 @@ services:
       #the label need to be under deploy so traefik can read it
       labels:
         - "traefik.enable=true" # enable traefik for this service
-        - "traefik.http.routers.{{ appName }}.rule=Host(`{{ appName }}{% if env != 'prod' %}-{{ env }}{% endif %}.kiri231.com`)"
-        - "traefik.http.routers.{{appName}}.entrypoints=websecure" # accesible by https
-        - "traefik.http.routers.{{appName}}.tls.certresolver=myresolver"
-        - "traefik.http.services.{{appName}}-service.loadbalancer.server.port=3000" # specify the port
+        - "traefik.http.routers.{{ appName }}-{{env}}.rule=Host(`{{ appName }}{% if env != 'prod' %}-{{ env }}{% endif %}.kiri231.com`)"
+        - "traefik.http.routers.{{appName}}-{{env}}.entrypoints=websecure" # accesible by https
+        - "traefik.http.routers.{{appName}}-{{env}}.tls.certresolver=myresolver"
+        - "traefik.http.services.{{appName}}-{{env}}-service.loadbalancer.server.port=3000" # specify the port
         - "com.centurylinklabs.watchtower.enable=true"
         - "com.centurylinklabs.watchtower.cleanup=true"
       replicas: 1 # have one instance running at a time
@@ -21,3 +21,7 @@ services:
         # update_config:
         # no funciona con docker compose , funciona con docker stack , docker service ...
         # order: start-first # rolling release, start new instance before stopping old one
+networks:
+  traefik-net:
+    external: true
+    name: myapp_default

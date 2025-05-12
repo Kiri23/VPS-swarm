@@ -173,7 +173,6 @@
         name: "{{env}}"
         compose: 
           - "/home/kiri/vps-swarm-local-vps-development/insfraestructura/ansible/templates/docker-compose-{{ appName }}-{{ env }}.yml"
-          - "/home/kiri/vps-swarm-local-vps-development/insfraestructura/compose/base.yml"
       environment:
         PATH: "{{ venv_path }}/bin:{{ ansible_env.PATH }}"
       vars:
