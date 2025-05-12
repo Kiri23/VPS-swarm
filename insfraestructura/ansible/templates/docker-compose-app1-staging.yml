@@ -9,7 +9,7 @@ services:
       #the label need to be under deploy so traefik can read it
       labels:
         - "traefik.enable=true" # enable traefik for this service
-        - "traefik.http.routers.app1.rule=Host(`{{env}}.{{appName}}.kiri231.com`)" # route all traffic to this service
+        - "traefik.http.routers.app1.rule=Host(`app1-staging.kiri231.com`)"
         - "traefik.http.routers.app1.entrypoints=websecure" # accesible by https
         - "traefik.http.routers.app1.tls.certresolver=myresolver"
         - "traefik.http.services.app1-service.loadbalancer.server.port=3000" # specify the port
