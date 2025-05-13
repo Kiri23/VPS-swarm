@@ -120,7 +120,7 @@
       when: not dockerfile_exists.stat.exists
 
     - name: Disable Docker credential helpers
-      run: |
+      command: |
         mkdir -p ~/.docker
         echo '{"credsStore":"","credHelpers":{}}' > ~/.docker/config.json
 
