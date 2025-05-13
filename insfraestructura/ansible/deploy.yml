@@ -10,6 +10,15 @@
     app_path: "/home/kiri/vps-swarm-local-vps-development/app1" 
   
   tasks:
+    - name: Include application variables
+      include_vars:
+        file: "../../app1/pass.yml"
+    
+    - name: Include Vault credentials
+      include_vars:
+        file: "var/vault.yml"
+      no_log: true
+
     - name: Check if virtualenv package is installed
       ansible.builtin.command: dpkg -l python3-virtualenv
       register: virtualenv_check
@@ -99,20 +108,16 @@
       environment:
         PATH: "{{ venv_path }}/bin:{{ ansible_env.PATH }}"
 
-    - name: Include application variables
-      include_vars:
-        file: "../../app1/pass.yml"
-
     # Construcción y publicación de la imagen Docker
-    # - name: Check if Dockerfile exists
-    #   ansible.builtin.stat:
-    #     path: "{{ app_path }}/Dockerfile"
-    #   register: dockerfile_exists
+    - name: Check if Dockerfile exists
+      ansible.builtin.stat:
+        path: "{{ app_path }}/Dockerfile"
+      register: dockerfile_exists
       
-    # - name: Fail if Dockerfile doesn't exist
-    #   ansible.builtin.fail:
-    #     msg: "No se encontró el Dockerfile en {{ app_path }}/Dockerfile"
-    #   when: not dockerfile_exists.stat.exists
+    - name: Fail if Dockerfile doesn't exist
+      ansible.builtin.fail:
+        msg: "No se encontró el Dockerfile en {{ app_path }}/Dockerfile"
+      when: not dockerfile_exists.stat.exists
 
     # - name: Check Docker Hub login status
     #   ansible.builtin.shell: docker info | grep -q 'Username:'

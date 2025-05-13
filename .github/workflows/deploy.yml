@@ -19,6 +19,10 @@ jobs:
         echo "host_key_checking = False" >> ansible.cfg
         echo "[ssh_connection]" >> ansible.cfg
         echo "pipelining = True" >> ansible.cfg
+
+    - name: Create vault password file
+      run: |
+        echo "${{ secrets.VAULT_PASSWORD }}" > .vault_password
         
     - name: Set up SSH keys
       uses: webfactory/ssh-agent@v0.7.0
@@ -35,4 +39,4 @@ jobs:
         
     - name: Run Ansible playbook
       run: |
-        ansible-playbook -i ${{ github.workspace }}/insfraestructura/ansible/inventory.yml ${{ github.workspace }}/insfraestructura/ansible/deploy.yml
+        ansible-playbook -i ${{ github.workspace }}/insfraestructura/ansible/inventory.yml ${{ github.workspace }}/insfraestructura/ansible/deploy.yml --vault-password-file .vault_password
