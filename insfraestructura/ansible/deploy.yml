@@ -123,6 +123,9 @@
       community.docker.docker_login:
         username: "{{ dockerUsername }}"
         password: "{{ dockerPassword }}"
+				config_path: "{{ ansible_env.HOME }}/.docker/config.json"
+        state: present
+        reauthorize: yes
       environment:
         PATH: "{{ venv_path }}/bin:{{ ansible_env.PATH }}"
       vars:

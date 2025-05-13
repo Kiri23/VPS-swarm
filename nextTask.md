@@ -1,0 +1,3 @@
+- utilizar uv 
+- utilitzar ansible vault para conectarte a docker hub 
+- craer roles
