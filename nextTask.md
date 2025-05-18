@@ -1,3 +1,5 @@
-- utilizar uv 
+- utilizar uv ,
 - utilitzar ansible vault para conectarte a docker hub 
 - craer roles
+- uvx --from ansible-core --with ansible ansible-playbook tu-playbook.yml
+- uv github action

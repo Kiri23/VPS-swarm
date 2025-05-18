@@ -17,6 +17,7 @@ jobs:
       run: |
         echo "[defaults]" > ansible.cfg
         echo "host_key_checking = False" >> ansible.cfg
+        echo "inventory = ${{ github.workspace }}/infraestructura/ansible/kiri/vps/inventory.yml" >> ansible.cfg
         echo "[ssh_connection]" >> ansible.cfg
         echo "pipelining = True" >> ansible.cfg
 
@@ -28,16 +29,18 @@ jobs:
       uses: webfactory/ssh-agent@v0.7.0
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-        
-    - name: Install Ansible
-      run: pip install ansible
-        
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+  
     - name: Set environment variables
       run: |
         echo "SSH_HOST=${{ secrets.SSH_HOST }}" >> $GITHUB_ENV
         echo "SSH_USER=${{ secrets.SSH_USER }}" >> $GITHUB_ENV
         echo "ANSIBLE_DIR=${{ github.workspace }}/infraestructura/ansible/kiri/vps" >> $GITHUB_ENV
-        
-    - name: Run Ansible playbook
+
+    - name: Install dependencies
       run: |
-        ansible-playbook -i ${{ env.ANSIBLE_DIR }}/inventory.yml ${{ env.ANSIBLE_DIR }}/playbooks/deploy.yml --vault-password-file .vault_password
+        uvx --from ansible-core --with ansible ansible-playbook ${{ env.ANSIBLE_DIR }}/playbooks/deploy.yml --vault-password-file .vault_password
