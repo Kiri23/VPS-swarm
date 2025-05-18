@@ -21,6 +21,29 @@
         # it also need to be relative 
         file: "../var/vault.yml"
 
+    - name: Check if virtualenv package is installed
+      ansible.builtin.command: dpkg -l python3-virtualenv
+      register: virtualenv_check
+      changed_when: false
+      failed_when: false
+      check_mode: no
+
+    - name: Ensure virtualenv package is installed
+      ansible.builtin.package:
+        name: python3-virtualenv
+        state: present
+      become: true
+      when: virtualenv_check.rc != 0  # Solo ejecutar si el paquete no está instalado
+      
+    - name: Check if virtual environment exists
+      ansible.builtin.stat:
+        path: "{{ venv_path }}/bin/python"
+      register: venv_exists
+
+    - name: Create virtual environment
+      ansible.builtin.command: python3 -m venv "{{ venv_path }}"
+      when: not venv_exists.stat.exists
+
     - name: Ensure requirements file directory exists
       ansible.builtin.file:
         path: "{{ requirements_file | dirname }}"
