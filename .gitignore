@@ -1,2 +1,4 @@
 .ssh/
 node_modules/
+# I need the venv files from ansible in order to run the playbook 
+# if i ignore the virtual enviroment, the playbook does not have permission to create a new one in the github action
