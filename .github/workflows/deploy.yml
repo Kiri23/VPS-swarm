@@ -39,4 +39,4 @@ jobs:
         
     - name: Run Ansible playbook
       run: |
-        ansible-playbook -i ${{ github.workspace }}/infraestructura/ansible/inventory.yml ${{ github.workspace }}/infraestructura/ansible/deploy.yml --vault-password-file .vault_password
+        ansible-playbook -i ${{ github.workspace }}/infraestructura/ansible/kiri/vps/inventory.yml ${{ github.workspace }}/infraestructura/ansible/kiri/vps/deploy.yml --vault-password-file .vault_password
