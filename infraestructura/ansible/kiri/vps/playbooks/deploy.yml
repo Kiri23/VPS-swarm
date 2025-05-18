@@ -18,7 +18,8 @@
     
     - name: Include Vault credentials
       include_vars:
-        file: "{{collection_path }}/var/vault.yml"
+        # it also need to be relative 
+        file: "../var/vault.yml"
 
     - name: Check if virtualenv package is installed
       ansible.builtin.command: dpkg -l python3-virtualenv
