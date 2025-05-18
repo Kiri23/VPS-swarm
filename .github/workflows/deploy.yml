@@ -18,6 +18,7 @@ jobs:
         echo "[defaults]" > ansible.cfg
         echo "host_key_checking = False" >> ansible.cfg
         echo "inventory = ${{ github.workspace }}/infraestructura/ansible/kiri/vps/inventory.yml" >> ansible.cfg
+        echo "collections_path = ${{ github.workspace }}/infraestructura/ansible/collections" >> ansible.cfg
         echo "[ssh_connection]" >> ansible.cfg
         echo "pipelining = True" >> ansible.cfg
 
@@ -39,8 +40,7 @@ jobs:
       run: |
         echo "SSH_HOST=${{ secrets.SSH_HOST }}" >> $GITHUB_ENV
         echo "SSH_USER=${{ secrets.SSH_USER }}" >> $GITHUB_ENV
-        echo "ANSIBLE_DIR=${{ github.workspace }}/infraestructura/ansible/kiri/vps" >> $GITHUB_ENV
 
-    - name: Install dependencies
+    - name: Run Ansible playbook
       run: |
-        uvx --from ansible-core --with ansible ansible-playbook ${{ env.ANSIBLE_DIR }}/playbooks/deploy.yml --vault-password-file .vault_password
+        uvx --from ansible-core --with ansible ansible-playbook kiri.vps.deploy --vault-password-file .vault_password
