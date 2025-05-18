@@ -1,2 +1,3 @@
 .ssh/
 node_modules/
+infraestructura/ansible/.venv/*

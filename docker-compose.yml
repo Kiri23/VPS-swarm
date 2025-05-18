@@ -2,7 +2,7 @@
 # This docker-compose.yml uses Docker Swarm specific syntax and features:
 # - 'deploy' section with replicas and restart policies
 # - Labels under 'deploy' section for Traefik in Swarm mode
-# - To deploy: use 'docker stack deploy -c docker-compose.yml -c insfraestructura/compose/base.yml myapp'
+# - To deploy: use 'docker stack deploy -c docker-compose.yml -c infraestructura/compose/base.yml myapp'
 # - The idea is to "compose" combine multiple docker compose files 
 # - NOT compatible with regular 'docker-compose up' command
 # aqui estoy cogiendo y cambiandolo em texstatic
