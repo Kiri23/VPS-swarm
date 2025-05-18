@@ -1,6 +1,6 @@
 ---
 - name: Deploy applications to Docker Swarm
-  hosts: vps
+  hosts: localhost
   vars:
     # Variables por defecto que pueden ser sobrescritas
     apps: []  # Lista de aplicaciones a desplegar
@@ -8,11 +8,12 @@
     venv_path: "/home/kiri/vps-swarm-local-vps-development/infraestructura/ansible/.venv"
     requirements_file: "/home/kiri/vps-swarm-local-vps-development/infraestructura/ansible/requirements.txt"
     collection_path: "/home/kiri/vps-swarm-local-vps-development/infraestructura/ansible/kiri/vps"
-    app_path: "/home/kiri/vps-swarm-local-vps-development/app1" 
+    app_path: "../../../../../app1" 
   
   tasks:
     - name: Include application variables
       include_vars:
+      # it need to be relative to the playbook because is running inside the gitub action
         file: "{{ app_path }}/pass.yml"
     
     - name: Include Vault credentials
