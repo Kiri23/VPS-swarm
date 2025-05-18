@@ -21,98 +21,98 @@
         # it also need to be relative 
         file: "../var/vault.yml"
 
-    - name: Check if virtualenv package is installed
-      ansible.builtin.command: dpkg -l python3-virtualenv
-      register: virtualenv_check
-      changed_when: false
-      failed_when: false
-      check_mode: no
+    # - name: Check if virtualenv package is installed
+    #   ansible.builtin.command: dpkg -l python3-virtualenv
+    #   register: virtualenv_check
+    #   changed_when: false
+    #   failed_when: false
+    #   check_mode: no
 
-    - name: Ensure virtualenv package is installed
-      ansible.builtin.package:
-        name: python3-virtualenv
-        state: present
-      become: true
-      when: virtualenv_check.rc != 0  # Solo ejecutar si el paquete no está instalado
+    # - name: Ensure virtualenv package is installed
+    #   ansible.builtin.package:
+    #     name: python3-virtualenv
+    #     state: present
+    #   become: true
+    #   when: virtualenv_check.rc != 0  # Solo ejecutar si el paquete no está instalado
       
-    - name: Check if virtual environment exists
-      ansible.builtin.stat:
-        path: "{{ venv_path }}/bin/python"
-      register: venv_exists
+    # - name: Check if virtual environment exists
+    #   ansible.builtin.stat:
+    #     path: "{{ venv_path }}/bin/python"
+    #   register: venv_exists
 
-    - name: Debug virtual environment existence
-      ansible.builtin.debug:
-        msg: "Virtual environment exists: {{ venv_exists.stat.exists }}"
+    # - name: Debug virtual environment existence
+    #   ansible.builtin.debug:
+    #     msg: "Virtual environment exists: {{ venv_exists.stat.exists }}"
 
-    - name: Create virtual environment
-      ansible.builtin.command: python3 -m venv "{{ venv_path }}"
-      when: not venv_exists.stat.exists
+    # - name: Create virtual environment
+    #   ansible.builtin.command: python3 -m venv "{{ venv_path }}"
+    #   when: not venv_exists.stat.exists
 
-    - name: Ensure requirements file directory exists
-      ansible.builtin.file:
-        path: "{{ requirements_file | dirname }}"
-        state: directory
-        mode: '0755'
+    # - name: Ensure requirements file directory exists
+    #   ansible.builtin.file:
+    #     path: "{{ requirements_file | dirname }}"
+    #     state: directory
+    #     mode: '0755'
 
-    - name: Create requirements file if it doesn't exist
-      ansible.builtin.copy:
-        dest: "{{ requirements_file }}"
-        content: |
-          jsondiff
-          docker
-          pyyaml
-        force: no  # No sobrescribir si ya existe
+    # - name: Create requirements file if it doesn't exist
+    #   ansible.builtin.copy:
+    #     dest: "{{ requirements_file }}"
+    #     content: |
+    #       jsondiff
+    #       docker
+    #       pyyaml
+    #     force: no  # No sobrescribir si ya existe
 
-    # Verificar si jsondiff está instalado
-    - name: Check if jsondiff is installed
-      ansible.builtin.command: "{{ venv_path }}/bin/python -c 'import jsondiff'"
-      register: jsondiff_check
-      changed_when: false
-      failed_when: false
-      ignore_errors: true
+    # # Verificar si jsondiff está instalado
+    # - name: Check if jsondiff is installed
+    #   ansible.builtin.command: "{{ venv_path }}/bin/python -c 'import jsondiff'"
+    #   register: jsondiff_check
+    #   changed_when: false
+    #   failed_when: false
+    #   ignore_errors: true
 
-    # Verificar si pyyaml está instalado
-    - name: Check if pyyaml is installed
-      ansible.builtin.command: "{{ venv_path }}/bin/python -c 'import yaml'"
-      register: pyyaml_check
-      changed_when: false
-      failed_when: false
-      ignore_errors: true
+    # # Verificar si pyyaml está instalado
+    # - name: Check if pyyaml is installed
+    #   ansible.builtin.command: "{{ venv_path }}/bin/python -c 'import yaml'"
+    #   register: pyyaml_check
+    #   changed_when: false
+    #   failed_when: false
+    #   ignore_errors: true
 
-    # Verificar si docker está instalado
-    - name: Check if docker-py is installed
-      ansible.builtin.command: "{{ venv_path }}/bin/python -c 'import docker'"
-      register: docker_check
-      changed_when: false
-      failed_when: false
-      ignore_errors: true
+    # # Verificar si docker está instalado
+    # - name: Check if docker-py is installed
+    #   ansible.builtin.command: "{{ venv_path }}/bin/python -c 'import docker'"
+    #   register: docker_check
+    #   changed_when: false
+    #   failed_when: false
+    #   ignore_errors: true
 
-    - name: Install jsondiff if missing
-      ansible.builtin.pip:
-        name: jsondiff
-        virtualenv: "{{ venv_path }}"
-        state: present
-      when: jsondiff_check.rc != 0
-      environment:
-        PATH: "{{ venv_path }}/bin:{{ ansible_env.PATH }}"
+    # - name: Install jsondiff if missing
+    #   ansible.builtin.pip:
+    #     name: jsondiff
+    #     virtualenv: "{{ venv_path }}"
+    #     state: present
+    #   when: jsondiff_check.rc != 0
+    #   environment:
+    #     PATH: "{{ venv_path }}/bin:{{ ansible_env.PATH }}"
 
-    - name: Install pyyaml if missing
-      ansible.builtin.pip:
-        name: pyyaml
-        virtualenv: "{{ venv_path }}"
-        state: present
-      when: pyyaml_check.rc != 0
-      environment:
-        PATH: "{{ venv_path }}/bin:{{ ansible_env.PATH }}"
+    # - name: Install pyyaml if missing
+    #   ansible.builtin.pip:
+    #     name: pyyaml
+    #     virtualenv: "{{ venv_path }}"
+    #     state: present
+    #   when: pyyaml_check.rc != 0
+    #   environment:
+    #     PATH: "{{ venv_path }}/bin:{{ ansible_env.PATH }}"
 
-    - name: Install docker-py if missing
-      ansible.builtin.pip:
-        name: docker
-        virtualenv: "{{ venv_path }}"
-        state: present
-      when: docker_check.rc != 0
-      environment:
-        PATH: "{{ venv_path }}/bin:{{ ansible_env.PATH }}"
+    # - name: Install docker-py if missing
+    #   ansible.builtin.pip:
+    #     name: docker
+    #     virtualenv: "{{ venv_path }}"
+    #     state: present
+    #   when: docker_check.rc != 0
+    #   environment:
+    #     PATH: "{{ venv_path }}/bin:{{ ansible_env.PATH }}"
 
     # Construcción y publicación de la imagen Docker
     - name: Check if Dockerfile exists
