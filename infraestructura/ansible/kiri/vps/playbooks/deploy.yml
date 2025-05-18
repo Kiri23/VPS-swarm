@@ -7,17 +7,17 @@
     env: dev  # Entorno por defecto
     venv_path: "/home/kiri/vps-swarm-local-vps-development/infraestructura/ansible/.venv"
     requirements_file: "/home/kiri/vps-swarm-local-vps-development/infraestructura/ansible/requirements.txt"
+    collection_path: "/home/kiri/vps-swarm-local-vps-development/infraestructura/ansible/kiri/vps"
     app_path: "/home/kiri/vps-swarm-local-vps-development/app1" 
   
   tasks:
     - name: Include application variables
       include_vars:
-        file: "../../app1/pass.yml"
+        file: "{{ app_path }}/pass.yml"
     
     - name: Include Vault credentials
       include_vars:
-        file: "var/vault.yml"
-      no_log: true
+        file: "{{collection_path }}/var/vault.yml"
 
     - name: Check if virtualenv package is installed
       ansible.builtin.command: dpkg -l python3-virtualenv
@@ -171,7 +171,7 @@
     # No funciona aunqe no tira nigun error
     - name: Push Docker image
       command: |
-        echo "${{ dockerPassword }}" | docker login -u ${{ dockerUsername }} --password-stdin
+        echo "{{ dockerPassword }}" | docker login -u {{ dockerUsername }} --password-stdin
         docker push kiri23/{{ imageName }}:{{ env }}
 
     # - name: Push image to Docker Hub
@@ -198,15 +198,15 @@
 
     - name: Generate docker-compose files for each application
       template:
-        src: docker-compose-staging.yml.j2
-        dest: "/home/kiri/vps-swarm-local-vps-development/infraestructura/ansible/templates/docker-compose-{{ appName }}-{{ env }}.yml"
+        src: "{{collection_path }}/templates/docker-compose-staging.yml.j2"
+        dest: "{{collection_path }}/templates/docker-compose-{{ appName }}-{{ env }}.yml"
         
     - name: Deploy stack to Staging
       community.docker.docker_stack:
         state: present
         name: "{{env}}"
         compose: 
-          - "/home/kiri/vps-swarm-local-vps-development/infraestructura/ansible/templates/docker-compose-{{ appName }}-{{ env }}.yml"
+          - "{{collection_path }}/templates/docker-compose-{{ appName }}-{{ env }}.yml"
       environment:
         PATH: "{{ venv_path }}/bin:{{ ansible_env.PATH }}"
       vars:

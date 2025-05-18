@@ -36,7 +36,8 @@ jobs:
       run: |
         echo "SSH_HOST=${{ secrets.SSH_HOST }}" >> $GITHUB_ENV
         echo "SSH_USER=${{ secrets.SSH_USER }}" >> $GITHUB_ENV
+        echo "ANSIBLE_DIR=${{ github.workspace }}/infraestructura/ansible/kiri/vps" >> $GITHUB_ENV
         
     - name: Run Ansible playbook
       run: |
-        ansible-playbook -i ${{ github.workspace }}/infraestructura/ansible/kiri/vps/inventory.yml ${{ github.workspace }}/infraestructura/ansible/kiri/vps/playbooks/deploy.yml --vault-password-file .vault_password
+        ansible-playbook -i ${{ env.ANSIBLE_DIR }}/inventory.yml ${{ env.ANSIBLE_DIR }}/playbooks/deploy.yml --vault-password-file .vault_password
