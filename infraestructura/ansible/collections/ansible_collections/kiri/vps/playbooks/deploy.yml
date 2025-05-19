@@ -12,8 +12,8 @@
     collection_path: "{{ collection_dir }}/kiri/vps" 
     app_path: "{{ base_dir }}/app1"
   environment:
-    # anade un path adicional a la variable PATH
-    PATH: "/home/kiri/.local/bin:{{ lookup('env', 'PATH') }}"
+    # anade tus custom path, por defecto ansible no incluye home/kiri/.local en los path
+    PATH: "/home/kiri/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
   pre_tasks:
   - name: Install dependencies
     import_role:
