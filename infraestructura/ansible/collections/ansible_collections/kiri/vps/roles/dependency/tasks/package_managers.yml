@@ -9,6 +9,10 @@
   delegate_to: "{{ inventory_hostname }}"
   tags: uv
 
+- name: debug location of UV which
+  ansible.builtin.debug:
+    msg: "Uv which stdout: {{uv_which}}"
+
 - name: Install Python uv if not installed
   ansible.builtin.shell: |
     curl -LsSf https://astral.sh/uv/install.sh | sh
