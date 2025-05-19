@@ -1,11 +1,10 @@
 ---
 # Tasks for installing package managers
 
-- name: Check if Python uv is installed
-  ansible.builtin.command: which uv
-  register: uv_check
-  changed_when: uv_check.rc != 0
-  ignore_errors: true
+- name: Check if uv binary exists in .cargo/bin
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.cargo/bin/uv"
+  register: uv_binary
   delegate_to: "{{ inventory_hostname }}"
   tags: uv
 
@@ -14,19 +13,18 @@
     curl -LsSf https://astral.sh/uv/install.sh | sh
   args:
     executable: /bin/bash
-  when: uv_check.rc != 0
+  when: not uv_binary.stat.exists
   delegate_to: "{{ inventory_hostname }}"
   tags: uv
 
-- name: Get uv installation path
-  ansible.builtin.shell: |
-    echo "$HOME/.cargo/bin/uv"
-  register: uv_path
-  changed_when: false
+- name: Verify uv installation
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.cargo/bin/uv"
+  register: uv_installed
   delegate_to: "{{ inventory_hostname }}"
   tags: uv
 
 - name: Display Python uv status
   ansible.builtin.debug:
-    msg: "Python uv is {{ 'installed' if uv_check.rc == 0 else 'not installed' }} at {{ uv_path.stdout | trim }}"
+    msg: "Python uv is {{ 'installed' if uv_installed.stat.exists else 'not installed' }} at {{ ansible_env.HOME }}/.cargo/bin/uv"
   tags: uv

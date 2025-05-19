@@ -3,7 +3,7 @@
 
 - name: Check if required Python packages are installed
   ansible.builtin.shell: |
-    $HOME/.cargo/bin/uv pip list
+    {{ ansible_env.HOME }}/.cargo/bin/uv pip list
   register: pip_list
   changed_when: false
   delegate_to: "{{ inventory_hostname }}"
@@ -11,7 +11,7 @@
 
 - name: Install Python dependencies
   ansible.builtin.shell: |
-    $HOME/.cargo/bin/uv pip install jsondiff docker pyyaml
+    {{ ansible_env.HOME }}/.cargo/bin/uv pip install jsondiff docker pyyaml
   when: "'jsondiff' not in pip_list.stdout or 'docker' not in pip_list.stdout or 'pyyaml' not in pip_list.stdout"
   delegate_to: "{{ inventory_hostname }}"
   tags: python_deps
