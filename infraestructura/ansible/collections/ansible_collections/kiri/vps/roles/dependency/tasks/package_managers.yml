@@ -2,8 +2,7 @@
 # Tasks for installing package managers
 
 - name: Check if uv binary exists
-  ansible.builtin.shell: |
-    which uv
+  ansible.builtin.command: which uv
   register: uv_which
   changed_when: false
   delegate_to: "{{ inventory_hostname }}"
@@ -12,6 +11,7 @@
 - name: debug location of UV which
   ansible.builtin.debug:
     msg: "Uv which stdout: {{uv_which}}"
+  tags: uv
 
 - name: Install Python uv if not installed
   ansible.builtin.shell: |
