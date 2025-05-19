@@ -1,4 +1,6 @@
 ---
+# To run the playbook use this ansible-playbook kiri.vps.deploy --limit localhost
+# <nameOfCollection> limit to only run on localhost
 - name: Deploy applications to Docker Swarm
   hosts: all
   vars:

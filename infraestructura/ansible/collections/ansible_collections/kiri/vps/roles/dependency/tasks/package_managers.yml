@@ -1,10 +1,11 @@
 ---
 # Tasks for installing package managers
 
-- name: Check if uv binary exists in .cargo/bin
-  ansible.builtin.stat:
-    path: "{{ ansible_env.HOME }}/.cargo/bin/uv"
-  register: uv_binary
+- name: Check if uv binary exists
+  ansible.builtin.shell: |
+    which uv || echo ""
+  register: uv_which
+  changed_when: false
   delegate_to: "{{ inventory_hostname }}"
   tags: uv
 
@@ -13,7 +14,7 @@
     curl -LsSf https://astral.sh/uv/install.sh | sh
   args:
     executable: /bin/bash
-  when: not uv_binary.stat.exists
+  when: uv_which.stdout == ""
   delegate_to: "{{ inventory_hostname }}"
   tags: uv
 
@@ -60,10 +61,10 @@
 - name: Display alternative uv location
   ansible.builtin.debug:
     msg: "Found uv at: {{ which_uv.stdout }}"
-  when: which_uv is defined and which_uv.stdout != ""
+  when: not uv_path and which_uv.stdout != ""
   tags: uv
 
 - name: Set final uv path
   ansible.builtin.set_fact:
-    uv_executable: "{{ uv_path | default(which_uv.stdout if which_uv is defined else '') | default('uv') }}"
+    uv_executable: "{{ uv_path | default(which_uv.stdout if not uv_path else '') | default('uv') }}"
   tags: uv
