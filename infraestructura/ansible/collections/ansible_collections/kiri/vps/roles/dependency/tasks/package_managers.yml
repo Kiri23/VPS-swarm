@@ -18,7 +18,15 @@
   delegate_to: "{{ inventory_hostname }}"
   tags: uv
 
+- name: Get uv installation path
+  ansible.builtin.shell: |
+    echo "$HOME/.cargo/bin/uv"
+  register: uv_path
+  changed_when: false
+  delegate_to: "{{ inventory_hostname }}"
+  tags: uv
+
 - name: Display Python uv status
   ansible.builtin.debug:
-    msg: "Python uv is {{ 'installed' if uv_check.rc == 0 else 'not installed' }}"
+    msg: "Python uv is {{ 'installed' if uv_check.rc == 0 else 'not installed' }} at {{ uv_path.stdout | trim }}"
   tags: uv
