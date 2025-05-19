@@ -43,4 +43,4 @@ jobs:
 
     - name: Run Ansible playbook
       run: |
-        uvx --from ansible-core --with ansible ansible-playbook kiri.vps.deploy --vault-password-file .vault_password
+        uvx --from ansible-core --with ansible ansible-playbook kiri.vps.deploy --vault-password-file .vault_password --limit vps

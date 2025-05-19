@@ -1,0 +1,15 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for dependency
+
+# Not used for now because handler run at then end of a playbook and dependency need to be installed before running the playbook
+# - name: Check if Python uv is installed
+#   ansible.builtin.command: which uv
+#   register: uv_check
+#   changed_when: false
+#   ignore_errors: true
+
+# - name: Display uv installation result
+#   ansible.builtin.debug:
+#     msg: "Python uv installation completed. Result: {{ uv_install_result.stdout }}"
+#   when: uv_install_result is defined

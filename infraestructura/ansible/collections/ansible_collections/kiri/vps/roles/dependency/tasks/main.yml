@@ -1,0 +1,14 @@
+---
+# This is the main entry point for the role
+# Include task files based on what functionality is needed
+
+- name: Include package manager installation tasks
+  ansible.builtin.import_tasks: package_managers.yml
+  tags: 
+    - package_managers
+    - uv
+
+- name: Include dependency installation tasks
+  ansible.builtin.import_tasks: dependencies.yml
+  tags:
+    - dependencies

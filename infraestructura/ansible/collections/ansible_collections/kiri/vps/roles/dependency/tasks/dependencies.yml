@@ -1,0 +1,14 @@
+---
+# Tasks for installing actual dependencies
+
+- name: Check if required Python packages are installed
+  ansible.builtin.command: uv pip list
+  register: pip_list
+  changed_when: false
+  tags: python_deps
+
+- name: Install Python dependencies
+  ansible.builtin.shell: |
+    uv pip install jsondiff docker pyyaml
+  when: "'jsondiff' not in pip_list.stdout or 'docker' not in pip_list.stdout or 'pyyaml' not in pip_list.stdout"
+  tags: python_deps

@@ -1,5 +1,5 @@
 - utilizar uv ,
 - utilitzar ansible vault para conectarte a docker hub 
-- craer roles
+- craer roles - usar pre task to install uv and conditionall install uv
 - uvx --from ansible-core --with ansible ansible-playbook tu-playbook.yml
 - uv github action

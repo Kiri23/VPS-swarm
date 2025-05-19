@@ -6,3 +6,9 @@ all:
       ansible_host: "{{ lookup('env', 'SSH_HOST') }}"
       ansible_user: "{{ lookup('env', 'SSH_USER') }}"
       ansible_ssh_private_key_file: "~/.ssh/id_ed25519"
+  vars:
+    # Detecta si estamos en GitHub Actions o local
+    # default means if value is not defined, use "false", otherwise use true
+    is_github_actions: "{{ lookup('env', 'GITHUB_ACTIONS') | default('false', true) }}"
+    # Base directory cambia según el entorno
+    base_dir: "{{ is_github_actions | bool | ternary(lookup('env', 'GITHUB_WORKSPACE'), '/home/kiri/vps-swarm-local-vps-development') }}"
