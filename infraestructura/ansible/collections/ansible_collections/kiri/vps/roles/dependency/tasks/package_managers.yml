@@ -3,7 +3,7 @@
 
 - name: Check if uv binary exists
   ansible.builtin.shell: |
-    which uv || echo ""
+    which uv
   register: uv_which
   changed_when: false
   delegate_to: "{{ inventory_hostname }}"
