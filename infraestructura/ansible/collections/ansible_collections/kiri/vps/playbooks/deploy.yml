@@ -10,7 +10,7 @@
     venv_path: "/home/kiri/vps-swarm-local-vps-development/infraestructura/ansible/.venv"
     collection_path: "{{ collection_dir }}/kiri/vps" 
     app_path: "{{ base_dir }}/app1"
-  enviroments:
+  environment:
     # anade un path adicional a la variable PATH
     # si no hay variable path definida usa un default
     PATH: "/home/kiri/.local/bin:{{ ansible_env.PATH | default('/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin') }}"
