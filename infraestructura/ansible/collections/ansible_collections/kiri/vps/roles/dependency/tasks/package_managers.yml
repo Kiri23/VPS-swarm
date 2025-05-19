@@ -1,40 +1,6 @@
 ---
 # Tasks for installing package managers
 
-- name: Diagnostic - Get hostname
-  ansible.builtin.shell: hostname
-  register: host_name
-  changed_when: false
-  tags: uv
-
-- name: Diagnostic - Get current user
-  ansible.builtin.shell: whoami
-  register: current_user
-  changed_when: false
-  tags: uv
-
-- name: Diagnostic - Get environment variables
-  ansible.builtin.shell: env | grep -E 'HOME|USER|PATH'
-  register: env_vars
-  changed_when: false
-  tags: uv
-
-- name: Diagnostic - Get current directory
-  ansible.builtin.shell: pwd
-  register: current_dir
-  changed_when: false
-  tags: uv
-
-- name: Display diagnostic information
-  ansible.builtin.debug:
-    msg: |
-      Hostname: {{ host_name.stdout }}
-      Current user: {{ current_user.stdout }}
-      Current directory: {{ current_dir.stdout }}
-      Environment variables:
-      {{ env_vars.stdout }}
-  tags: uv
-
 - name: Check if uv binary exists on remote host
   ansible.builtin.shell: which uv 2>/dev/null || echo ""
   register: uv_which
@@ -46,62 +12,106 @@
     msg: "UV which stdout: '{{uv_which.stdout}}'"
   tags: uv
 
+# Only run diagnostic tasks if UV is not installed
+- name: Run diagnostic tasks
+  when: uv_which.stdout == ""
+  block:
+    - name: Diagnostic - Get hostname
+      ansible.builtin.shell: hostname
+      register: host_name
+      changed_when: false
+      tags: uv
+
+    - name: Diagnostic - Get current user
+      ansible.builtin.shell: whoami
+      register: current_user
+      changed_when: false
+      tags: uv
+
+    - name: Diagnostic - Get environment variables
+      ansible.builtin.shell: env | grep -E 'HOME|USER|PATH'
+      register: env_vars
+      changed_when: false
+      tags: uv
+
+    - name: Diagnostic - Get current directory
+      ansible.builtin.shell: pwd
+      register: current_dir
+      changed_when: false
+      tags: uv
+
+    - name: Display diagnostic information
+      ansible.builtin.debug:
+        msg: |
+          Hostname: {{ host_name.stdout }}
+          Current user: {{ current_user.stdout }}
+          Current directory: {{ current_dir.stdout }}
+          Environment variables:
+          {{ env_vars.stdout }}
+      tags: uv
+
 - name: Install Python uv if not installed
   ansible.builtin.shell: |
     curl -LsSf https://astral.sh/uv/install.sh | sh
   args:
     executable: /bin/bash
   when: uv_which.stdout == ""
-  # No delegate_to here - will run on the target host by default
   tags: uv
 
-# Just a lot of finding to see where the github action decide where to store the uv
-# i know the github action is not responsible for where to put the downloaded uv but the installation have different effect running on local than on the vps
-- name: Find uv binary after installation
-  ansible.builtin.shell: |
-    find {{ ansible_env.HOME }} -name uv -type f 2>/dev/null || echo ""
-  register: find_uv
-  changed_when: false
-  delegate_to: "{{ inventory_hostname }}"
-  tags: uv
-
-- name: Display uv binary location
-  ansible.builtin.debug:
-    msg: "Found uv at: {{ find_uv.stdout_lines[0] | default('') }}"
-  when: find_uv.stdout_lines | length > 0
-  tags: uv
-
-- name: Set uv path fact
+# Skip all the finding tasks if UV is already installed
+- name: Set uv executable directly when already installed
   ansible.builtin.set_fact:
-    uv_path: "{{ find_uv.stdout_lines[0] | default('') }}"
+    uv_executable: "{{ uv_which.stdout }}"
+  when: uv_which.stdout != ""
   tags: uv
 
-- name: Display Python uv status and location
-  ansible.builtin.debug:
-    msg: >
-      {% if uv_path %}
-      Python uv is installed at {{ uv_path }}
-      {% else %}
-      Python uv was not found in the home directory
-      {% endif %}
-  tags: uv
+# Only run these tasks if we just installed UV
+- name: Find and configure UV path
+  when: uv_which.stdout == ""
+  block:
+    - name: Find uv binary after installation
+      ansible.builtin.shell: |
+        find {{ ansible_env.HOME }} -name uv -type f 2>/dev/null || echo ""
+      register: find_uv
+      changed_when: false
+      tags: uv
 
-- name: Check alternative locations for uv
-  ansible.builtin.shell: |
-    which uv || echo ""
-  register: which_uv
-  changed_when: false
-  delegate_to: "{{ inventory_hostname }}"
-  when: not uv_path
-  tags: uv
+    - name: Display uv binary location
+      ansible.builtin.debug:
+        msg: "Found uv at: {{ find_uv.stdout_lines[0] | default('') }}"
+      when: find_uv.stdout_lines | length > 0
+      tags: uv
 
-- name: Display alternative uv location
-  ansible.builtin.debug:
-    msg: "Found uv at: {{ which_uv.stdout }}"
-  when: not uv_path and which_uv.stdout != ""
-  tags: uv
+    - name: Set uv path fact
+      ansible.builtin.set_fact:
+        uv_path: "{{ find_uv.stdout_lines[0] | default('') }}"
+      tags: uv
 
-- name: Set final uv path
-  ansible.builtin.set_fact:
-    uv_executable: "{{ uv_path | default(which_uv.stdout if not uv_path else '') | default('uv') }}"
-  tags: uv
+    - name: Display Python uv status and location
+      ansible.builtin.debug:
+        msg: >
+          {% if uv_path %}
+          Python uv is installed at {{ uv_path }}
+          {% else %}
+          Python uv was not found in the home directory
+          {% endif %}
+      tags: uv
+
+    - name: Check alternative locations for uv
+      ansible.builtin.shell: |
+        which uv || echo ""
+      register: which_uv
+      changed_when: false
+      when: not uv_path
+      tags: uv
+
+    - name: Display alternative uv location
+      ansible.builtin.debug:
+        msg: "Found uv at: {{ which_uv.stdout }}"
+      when: not uv_path and which_uv.stdout != ""
+      tags: uv
+
+    - name: Set final uv path
+      ansible.builtin.set_fact:
+        uv_executable: "{{ uv_path | default(which_uv.stdout if not uv_path else '') | default('uv') }}"
+      tags: uv
