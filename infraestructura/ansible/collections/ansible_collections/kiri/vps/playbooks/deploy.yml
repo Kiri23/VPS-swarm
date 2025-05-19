@@ -12,8 +12,7 @@
     app_path: "{{ base_dir }}/app1"
   environment:
     # anade un path adicional a la variable PATH
-    # si no hay variable path definida usa un default
-    PATH: "/home/kiri/.local/bin:{{ ansible_env.PATH | default('/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin') }}"
+    PATH: "/home/kiri/.local/bin:{{ lookup('env', 'PATH') }}"
   pre_tasks:
   - name: Install dependencies
     import_role:
