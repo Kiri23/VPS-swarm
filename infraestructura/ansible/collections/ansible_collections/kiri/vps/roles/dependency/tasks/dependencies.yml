@@ -23,7 +23,7 @@
 
 - name: Display installed packages
   ansible.builtin.shell: |
-    {{ uv_executable }} pip list
+    cd {{ remote_role_path }}/files && {{ uv_executable }} pip list --venv vps-deps
   register: installed_packages
   changed_when: false
   tags: python_deps
