@@ -8,7 +8,7 @@
 
 - name: Set remote_role_path fact
   ansible.builtin.set_fact:
-    remote_role_path: "{{ ansible_env.HOME }}/vps-swarm-local-vps-development/infraestructura/ansible/collections/ansible_collections/kiri/vps/roles/dependency"
+    remote_role_path: "~/vps-swarm-local-vps-development/infraestructura/ansible/collections/ansible_collections/kiri/vps/roles/dependency"
   tags: python_deps
 
 - name: create virtual enviroment if does not exist 
