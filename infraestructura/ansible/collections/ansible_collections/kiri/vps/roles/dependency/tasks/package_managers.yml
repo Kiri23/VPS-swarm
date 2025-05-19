@@ -13,6 +13,10 @@
   changed_when: false
   tags: uv
 
+- name: Add home/kiri/.local to the PATH variable
+  ansible.builtin.shell: export PATH="/home/kiri/.local/bin:$PATH"
+  tags: uv
+
 - name: Diagnostic - Get environment variables
   ansible.builtin.shell: env | grep -E 'HOME|USER|PATH'
   register: env_vars
