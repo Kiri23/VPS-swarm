@@ -1,16 +1,16 @@
 ---
 # Tasks for installing package managers
 
-- name: Check if uv binary exists
-  ansible.builtin.command: which uv
+- name: Check if uv binary exists on remote host
+  ansible.builtin.shell: which uv 2>/dev/null || echo ""
   register: uv_which
   changed_when: false
-  delegate_to: "{{ inventory_hostname }}"
+  # No delegate_to here - will run on the target host by default
   tags: uv
 
-- name: debug location of UV which
+- name: Debug location of UV which
   ansible.builtin.debug:
-    msg: "Uv which stdout: {{uv_which}}"
+    msg: "UV which stdout: '{{uv_which.stdout}}'"
   tags: uv
 
 - name: Install Python uv if not installed
@@ -19,7 +19,7 @@
   args:
     executable: /bin/bash
   when: uv_which.stdout == ""
-  delegate_to: "{{ inventory_hostname }}"
+  # No delegate_to here - will run on the target host by default
   tags: uv
 
 # Just a lot of finding to see where the github action decide where to store the uv
