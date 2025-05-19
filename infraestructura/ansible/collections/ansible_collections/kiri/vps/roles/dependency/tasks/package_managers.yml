@@ -1,11 +1,44 @@
 ---
 # Tasks for installing package managers
 
+- name: Diagnostic - Get hostname
+  ansible.builtin.shell: hostname
+  register: host_name
+  changed_when: false
+  tags: uv
+
+- name: Diagnostic - Get current user
+  ansible.builtin.shell: whoami
+  register: current_user
+  changed_when: false
+  tags: uv
+
+- name: Diagnostic - Get environment variables
+  ansible.builtin.shell: env | grep -E 'HOME|USER|PATH'
+  register: env_vars
+  changed_when: false
+  tags: uv
+
+- name: Diagnostic - Get current directory
+  ansible.builtin.shell: pwd
+  register: current_dir
+  changed_when: false
+  tags: uv
+
+- name: Display diagnostic information
+  ansible.builtin.debug:
+    msg: |
+      Hostname: {{ host_name.stdout }}
+      Current user: {{ current_user.stdout }}
+      Current directory: {{ current_dir.stdout }}
+      Environment variables:
+      {{ env_vars.stdout }}
+  tags: uv
+
 - name: Check if uv binary exists on remote host
   ansible.builtin.shell: which uv 2>/dev/null || echo ""
   register: uv_which
   changed_when: false
-  # No delegate_to here - will run on the target host by default
   tags: uv
 
 - name: Debug location of UV which
