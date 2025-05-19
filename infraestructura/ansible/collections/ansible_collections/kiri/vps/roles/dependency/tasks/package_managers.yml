@@ -17,14 +17,51 @@
   delegate_to: "{{ inventory_hostname }}"
   tags: uv
 
-- name: Verify uv installation
-  ansible.builtin.stat:
-    path: "{{ ansible_env.HOME }}/.cargo/bin/uv"
-  register: uv_installed
+- name: Find uv binary after installation
+  ansible.builtin.shell: |
+    find {{ ansible_env.HOME }} -name uv -type f 2>/dev/null || echo ""
+  register: find_uv
+  changed_when: false
   delegate_to: "{{ inventory_hostname }}"
   tags: uv
 
-- name: Display Python uv status
+- name: Display uv binary location
   ansible.builtin.debug:
-    msg: "Python uv is {{ 'installed' if uv_installed.stat.exists else 'not installed' }} at {{ ansible_env.HOME }}/.cargo/bin/uv"
+    msg: "Found uv at: {{ find_uv.stdout }}"
+  when: find_uv.stdout != ""
+  tags: uv
+
+- name: Set uv path fact
+  ansible.builtin.set_fact:
+    uv_path: "{{ find_uv.stdout_lines[0] | default('') }}"
+  tags: uv
+
+- name: Display Python uv status and location
+  ansible.builtin.debug:
+    msg: >
+      {% if uv_path %}
+      Python uv is installed at {{ uv_path }}
+      {% else %}
+      Python uv was not found in the home directory
+      {% endif %}
+  tags: uv
+
+- name: Check alternative locations for uv
+  ansible.builtin.shell: |
+    which uv || echo ""
+  register: which_uv
+  changed_when: false
+  delegate_to: "{{ inventory_hostname }}"
+  when: not uv_path
+  tags: uv
+
+- name: Display alternative uv location
+  ansible.builtin.debug:
+    msg: "Found uv at: {{ which_uv.stdout }}"
+  when: which_uv.stdout != ""
+  tags: uv
+
+- name: Set final uv path
+  ansible.builtin.set_fact:
+    uv_executable: "{{ uv_path | default(which_uv.stdout) | default('uv') }}"
   tags: uv
