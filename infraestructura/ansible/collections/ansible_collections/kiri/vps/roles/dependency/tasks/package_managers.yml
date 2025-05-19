@@ -17,6 +17,8 @@
   delegate_to: "{{ inventory_hostname }}"
   tags: uv
 
+# Just a lot of finding to see where the github action decide where to store the uv
+# i know the github action is not responsible for where to put the downloaded uv but the installation have different effect running on local than on the vps
 - name: Find uv binary after installation
   ansible.builtin.shell: |
     find {{ ansible_env.HOME }} -name uv -type f 2>/dev/null || echo ""
@@ -27,8 +29,8 @@
 
 - name: Display uv binary location
   ansible.builtin.debug:
-    msg: "Found uv at: {{ find_uv.stdout }}"
-  when: find_uv.stdout != ""
+    msg: "Found uv at: {{ find_uv.stdout_lines[0] | default('') }}"
+  when: find_uv.stdout_lines | length > 0
   tags: uv
 
 - name: Set uv path fact
@@ -58,10 +60,10 @@
 - name: Display alternative uv location
   ansible.builtin.debug:
     msg: "Found uv at: {{ which_uv.stdout }}"
-  when: which_uv.stdout != ""
+  when: which_uv is defined and which_uv.stdout != ""
   tags: uv
 
 - name: Set final uv path
   ansible.builtin.set_fact:
-    uv_executable: "{{ uv_path | default(which_uv.stdout) | default('uv') }}"
+    uv_executable: "{{ uv_path | default(which_uv.stdout if which_uv is defined else '') | default('uv') }}"
   tags: uv
