@@ -5,18 +5,22 @@
   ansible.builtin.set_fact:
     uv_executable: "{{ uv_executable | default('uv') }}"
   tags: python_deps
-  
-- name: Check if required Python packages are installed
+
+- name: Install Python dependencies using uv sync with venv
   ansible.builtin.shell: |
-    {{ uv_executable }} pip list
-  register: pip_list
+    cd {{ collections_dir }}/kiri/vps/roles/dependency/files && {{ uv_executable }} sync --venv {{ ansible_env.HOME }}/.venv/vps-deps
+  delegate_to: "{{ inventory_hostname }}"
+  tags: python_deps
+
+- name: Display installed packages
+  ansible.builtin.shell: |
+    {{ uv_executable }} pip list --venv {{ ansible_env.HOME }}/.venv/vps-deps
+  register: installed_packages
   changed_when: false
   delegate_to: "{{ inventory_hostname }}"
   tags: python_deps
 
-- name: Install Python dependencies
-  ansible.builtin.shell: |
-    {{ uv_executable }} pip install jsondiff docker pyyaml
-  when: "'jsondiff' not in pip_list.stdout or 'docker' not in pip_list.stdout or 'pyyaml' not in pip_list.stdout"
-  delegate_to: "{{ inventory_hostname }}"
+- name: Show installed packages
+  ansible.builtin.debug:
+    msg: "{{ installed_packages.stdout_lines }}"
   tags: python_deps

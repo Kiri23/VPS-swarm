@@ -1,0 +1,11 @@
+[project]
+name = "vps-dependencies"
+version = "0.1.0"
+description = "Python dependencies for VPS deployment"
+requires-python = ">=3.9"
+
+dependencies = [
+    "jsondiff",
+    "docker",
+    "pyyaml",
+]
