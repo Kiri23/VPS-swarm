@@ -6,9 +6,9 @@
     uv_executable: "{{ uv_executable | default('uv') }}"
   tags: python_deps
 
-- name: Set remote_role_path fact
+- name: Set remote_role_dependency fact
   ansible.builtin.set_fact:
-    remote_role_path: "~/vps-swarm-local-vps-development/infraestructura/ansible/collections/ansible_collections/kiri/vps/roles/dependency"
+    remote_dependency_role_path: "{{ remote_role_path}}/dependency"
   tags: python_deps
 
 - name: create virtual enviroment if does not exist 
@@ -18,12 +18,12 @@
 # the shell collections by default run on the remote host
 - name: Install Python dependencies using uv sync with venv
   ansible.builtin.shell: |
-    cd {{ remote_role_path }}/files && {{ uv_executable }} sync
+    cd {{ remote_dependency_role_path }}/files && {{ uv_executable }} sync
   tags: python_deps
 
 - name: Display installed packages
   ansible.builtin.shell: |
-    cd {{ remote_role_path }}/files && {{ uv_executable }} pip list
+    cd {{ remote_dependency_role_path }}/files && {{ uv_executable }} pip list
   register: installed_packages
   changed_when: false
   tags: python_deps

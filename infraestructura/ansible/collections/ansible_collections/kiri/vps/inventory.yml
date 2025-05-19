@@ -17,3 +17,4 @@ all:
     # Base directory cambia según el entorno
     base_dir: "{{ is_github_actions | bool | ternary(lookup('env', 'GITHUB_WORKSPACE'), '/home/kiri/vps-swarm-local-vps-development') }}"
     collections_dir: "{{ base_dir }}/infraestructura/ansible/collections/ansible_collections"
+    remote_roles_path: ~/vps-swarm-local-vps-development/infraestructura/ansible/collections/ansible_collections/kiri/vps/roles
