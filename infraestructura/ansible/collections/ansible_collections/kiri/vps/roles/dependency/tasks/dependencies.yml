@@ -8,7 +8,7 @@
 
 - name: Set remote_role_dependency fact
   ansible.builtin.set_fact:
-    remote_dependency_role_path: "{{ remote_role_path}}/dependency"
+    remote_dependency_role_path: "{{ remote_roles_path }}/dependency"
   tags: python_deps
 
 - name: create virtual enviroment if does not exist 
