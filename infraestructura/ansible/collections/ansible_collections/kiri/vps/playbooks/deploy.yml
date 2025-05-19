@@ -3,6 +3,7 @@
 # <nameOfCollection> limit to only run on localhost
 - name: Deploy applications to Docker Swarm
   hosts: all
+  gather_facts: no
   vars:
     # Variables por defecto que pueden ser sobrescritas
     apps: []  # Lista de aplicaciones a desplegar
