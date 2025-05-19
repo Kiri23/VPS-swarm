@@ -26,7 +26,7 @@
       
     - name: Debug venv path 
       ansible.builtin.debug:
-        msg: {{ venv_path }}
+        msg: "{{ venv_path }}"
 
     # - name: Include Vault credentials
     #   include_vars:
