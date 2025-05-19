@@ -6,6 +6,10 @@ all:
       ansible_host: "{{ lookup('env', 'SSH_HOST') }}"
       ansible_user: "{{ lookup('env', 'SSH_USER') }}"
       ansible_ssh_private_key_file: "~/.ssh/id_ed25519"
+      ansible_env:
+        # anade un path adicional a la variable PATH
+        # si no hay variable path definida usa un default
+        PATH: "/home/kiri/.local/bin:{{ ansible_env.PATH | default('/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin') }}"
   vars:
     # Detecta si estamos en GitHub Actions o local
     # default means if value is not defined, use "false", otherwise use true
